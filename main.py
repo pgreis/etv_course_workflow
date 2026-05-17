@@ -66,11 +66,10 @@ def main():
     IS_HEADLESS = True
 
     options = Options()
-    options.add_argument("--window-size=1920,1080")
     if IS_HEADLESS:
         options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
-
+    driver.maximize_window()
 
     # login
     login_locators = LoginLocators()
