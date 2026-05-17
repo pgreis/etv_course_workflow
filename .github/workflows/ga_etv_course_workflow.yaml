@@ -40,9 +40,9 @@ jobs:
           docker run --rm \
             -e DB_URL \
             -e TABLE_NAME \
-            -e ETV_LOGIN_NAME \
+            -e LOGIN_NAME \
             -e LOGIN_URL \
-            -e ETV_LOGIN_PW \
+            -e LOGIN_PW \
             -e COURSE_OVERVIEW_URL \
             -e INVOICE_PERSON \
-            course-bot
+            etv-course-workflow
