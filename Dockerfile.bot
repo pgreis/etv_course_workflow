@@ -22,11 +22,8 @@ RUN --mount=type=secret,id=github_token \
     pip install --no-cache-dir -r temp-requirements.txt && \
     rm temp-requirements.txt
 
-COPY config /bot/config/
-COPY logger /bot/logger/
 COPY src /bot/src/
 COPY main.py /bot/main.py
-# COPY .env .env # just for local development
 
 ENV PYTHONPATH=/bot
 
