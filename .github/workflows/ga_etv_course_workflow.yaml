@@ -1,0 +1,48 @@
+name: Daily Course Bot
+
+on:
+  schedule:
+    - cron: "1 9,10 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    env:
+      DB_URL: ${{ secrets.DB_URL }}
+      TABLE_NAME: ${{ secrets.TABLE_NAME }}
+      LOGIN_NAME: ${{ secrets.LOGIN_NAME }}
+      LOGIN_URL: ${{ secrets.LOGIN_URL }}
+      LOGIN_PW: ${{ secrets.LOGIN_PW }}
+      COURSE_OVERVIEW_URL: ${{ secrets.COURSE_OVERVIEW_URL }}
+      INVOICE_PERSON : ${{ secrets.INVOICE_PERSON }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Enable Docker BuildKit
+        run: |
+          export DOCKER_BUILDKIT=1
+
+      - name: Create GitHub token file
+        run: echo "${{ secrets.GH_PAT }}" > .github_token
+
+      - name: Build course-bot image
+        run: |
+          docker build \
+            --secret id=github_token,src=.github_token \
+            -f Dockerfile.bot \
+            -t course-bot .
+
+      - name: Run course-bot container
+        run: |
+          docker run --rm \
+            -e DB_URL \
+            -e TABLE_NAME \
+            -e ETV_LOGIN_NAME \
+            -e LOGIN_URL \
+            -e ETV_LOGIN_PW \
+            -e COURSE_OVERVIEW_URL \
+            -e INVOICE_PERSON \
+            course-bot
