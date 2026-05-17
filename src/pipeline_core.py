@@ -1,33 +1,40 @@
-import time
-import random
-from typing import List, Optional
 from abc import ABC, abstractmethod
+import time
+from typing import List, Optional
+import logging
 
-from src.models import PlaywrightPipelineContext
+from selenium.webdriver.remote.webdriver import WebDriver
 
-class PlaywrightPipelineStep(ABC):
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__) # TODO: inject logger or centralize configuration
+
+
+class SeleniumStep(ABC):
     name : str
-    add_wait_time: Optional[float] = random.randint(2, 3)
-
+    driver : Optional[WebDriver] = None
+    
     @abstractmethod
-    def execute(self, ctx: PlaywrightPipelineContext) -> PlaywrightPipelineContext:
+    def execute(self, ctx: dict) -> None:
         pass
 
-class PlaywrightPipelineEngine:
-    def __init__(self, steps: List[PlaywrightPipelineStep]):
+class SeleniumPipelineEngine:
+    def __init__(self, steps: List[SeleniumStep]):
         self.steps = steps
 
-    def run(self, ctx: PlaywrightPipelineContext) -> PlaywrightPipelineContext:
+    def run(self, ctx: dict = None) -> dict:
+        ctx = ctx or {}
         for step in self.steps:
-            print(f"[STEP] {step.name}")
-
-            start = time.time()
+            logger.info(f"[STEP] {step.name}")
             try:
-                ctx = step.execute(ctx)
+                result = step.execute(ctx)
+                ctx[step.name] = result
             except Exception as e:
-                ctx.error = f"{step.name}: {e}"
+                logger.error(f"Error in step '{step.name}': {e}")
+                logger.error(f"Context at error: {ctx}")
                 break
 
-            print(f"done in {(time.time()-start)*1000:.2f}ms")
+            if ctx.get("stop_loop"):
+                logger.info(f"Stopping pipeline after step '{step.name}' because stop_loop=True")
+                break
 
         return ctx
