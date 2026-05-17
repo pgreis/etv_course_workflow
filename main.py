@@ -47,13 +47,13 @@ load_dotenv()
 
 # db
 db_conf = DatabaseConfig(db_url=os.getenv("DB_URL"), # TODO: centralize location for set env vars
-                         table_name=os.getenv("TABLE_NAME")) # TODO: centralize location for set env vars
+                         table_name=os.getenv("TABLE_NAME")) # TODO: centralize location for set env varsc
 
 
 db = DatabaseHandler(db_url=db_conf.db_url) # TODO: centralize location for set env vars
 db.load_table(table_name=db_conf.table_name) # TODO: centralize location for set env vars
 
-weekday_abbr=get_tomorrow_weekday_abbr(add_n_hours=24)
+weekday_abbr=get_tomorrow_weekday_abbr(add_n_hours=24) # TODO: hard coded
 active_courses = get_active_courses_by_weekday(course_table=db.loaded_table,
                                                weekday_ger_abb=weekday_abbr)
 
@@ -61,9 +61,9 @@ if not active_courses:
     logger.info("No active courses for %s", weekday_abbr)
     sys.exit()
 
-# driver
 
-IS_HEADLESS = False
+# driver
+IS_HEADLESS = True
 
 if IS_HEADLESS:
     options = Options()
@@ -72,7 +72,6 @@ if IS_HEADLESS:
 
 if not IS_HEADLESS:
     driver = webdriver.Firefox()
-
 
 
 # login
@@ -115,7 +114,7 @@ for active_course in active_courses:
     filter_locators.apply_filter_filled = fill_locator(filter_locators.apply_filter, "Angebote anzeigen")
 
 
-    CORRECT_FILTER_NUMBER = 3
+    CORRECT_FILTER_NUMBER = 3 # TODO: hard coded
 
     filter_pipeline = SeleniumPipelineEngine(
         steps=[
