@@ -11,7 +11,7 @@ from src.pipeline_core import SeleniumStep
 
 class ClickSectionIsBlockingStep(SeleniumStep):
 
-    def __init__(self, driver: Optional[WebDriver] = None, name:str="Click Section Is Blocking", add_wait_time: Optional[float] = 2.0):
+    def __init__(self, driver: Optional[WebDriver] = None, name:str="Click Section Is Blocking", add_wait_time: Optional[float] = 5.0):
         self.driver = driver
         self.name = name
         self.add_wait_time = add_wait_time
