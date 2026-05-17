@@ -19,7 +19,7 @@ class ClickSectionIsBlockingStep(SeleniumStep):
     def execute(self, ctx: dict, xpath: str = '//section[contains(normalize-space(@class), "is-blocking")]//button[contains(@class, "close")]') -> None:
         try:      
             time.sleep(self.add_wait_time or 0)     
-            element = WebDriverWait(driver=self.driver, timeout=5).until(EC.element_to_be_clickable(mark = (By.XPATH, xpath)))
+            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, xpath)))
             element.click()
         except Exception as e:
             return None
@@ -56,7 +56,7 @@ class ClickElementStep(SeleniumStep):
 
     def execute(self, ctx: dict) -> None:
         time.sleep(self.add_wait_time or 0)
-        element = WebDriverWait(driver=self.driver, timeout=10).until(EC.element_to_be_clickable(mark = (By.XPATH, self.xpath)))
+        element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, self.xpath)))
         element.click()
 
 class FillInputStep(SeleniumStep):
@@ -69,7 +69,7 @@ class FillInputStep(SeleniumStep):
 
     def execute(self, ctx: dict) -> None:
         time.sleep(self.add_wait_time or 0)
-        element = WebDriverWait(driver=self.driver, timeout=10).until(EC.presence_of_element_located(locator = (By.XPATH, self.xpath)))
+        element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, self.xpath)))
         element.send_keys(self.value)
 
 class GetElementAttributeStep(SeleniumStep):
@@ -82,7 +82,7 @@ class GetElementAttributeStep(SeleniumStep):
 
     def execute(self, ctx: dict) -> Optional[str]:
         time.sleep(self.add_wait_time or 0)
-        element = WebDriverWait(driver=self.driver, timeout=10).until(
+        element = WebDriverWait(driver=self.driver, timeout=20).until(
             EC.presence_of_element_located((By.XPATH, self.xpath))
         )
 
