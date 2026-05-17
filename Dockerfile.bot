@@ -2,28 +2,39 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
-    firefox-esr wget xvfb tar libpq-dev gcc git \
+    firefox-esr \
+    wget \
+    xvfb \
+    tar \
+    libpq-dev \
+    gcc \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
+# Install geckodriver
 RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux64.tar.gz \
-    && tar -xvzf geckodriver-v0.36.0-linux64.tar.gz \
+    && tar -xzf geckodriver-v0.36.0-linux64.tar.gz \
     && mv geckodriver /usr/local/bin/ \
     && chmod +x /usr/local/bin/geckodriver \
     && rm geckodriver-v0.36.0-linux64.tar.gz
 
 ENV DISPLAY=:99
+
 WORKDIR /bot
 
+# Copy dependency file first for Docker cache efficiency
 COPY requirements.txt .
 
+# Install Python dependencies
 RUN --mount=type=secret,id=github_token \
     cp requirements.txt temp-requirements.txt && \
     sed -i "s|\${GITHUB_TOKEN}|$(cat /run/secrets/github_token)|g" temp-requirements.txt && \
     pip install --no-cache-dir -r temp-requirements.txt && \
     rm temp-requirements.txt
 
-COPY src /bot/src/
-COPY main.py /bot/main.py
+# Copy application files
+COPY src ./src
+COPY main.py .
 
 ENV PYTHONPATH=/bot
 
