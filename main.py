@@ -65,13 +65,11 @@ def main():
     # driver
     IS_HEADLESS = True
 
+    options = Options()
+    options.add_argument("--window-size=1920,1080")
     if IS_HEADLESS:
-        options = Options()
         options.add_argument("--headless")
-        driver = webdriver.Firefox(options=options)
-
-    if not IS_HEADLESS:
-        driver = webdriver.Firefox()
+    driver = webdriver.Firefox(options=options)
 
 
     # login
