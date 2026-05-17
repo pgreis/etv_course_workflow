@@ -28,14 +28,14 @@ jobs:
       - name: Create GitHub token file
         run: echo "${{ secrets.GH_PAT }}" > .github_token
 
-      - name: Build course-bot image
+      - name: Build etv-course-workflow image
         run: |
           docker build \
             --secret id=github_token,src=.github_token \
             -f Dockerfile.bot \
-            -t course-bot .
+            -t etv-course-workflow .
 
-      - name: Run course-bot container
+      - name: Run etv-course-workflow container
         run: |
           docker run --rm \
             -e DB_URL \
