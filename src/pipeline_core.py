@@ -1,3 +1,6 @@
+import os
+from datetime import datetime
+
 from abc import ABC, abstractmethod
 from typing import List, Optional
 import logging
@@ -32,3 +35,32 @@ class SeleniumPipelineEngine:
                 break
 
         return ctx
+
+
+class SaveArtifact(ABC):
+
+    def __init__(self, driver: Optional[WebDriver] = None, name:str=None, base_dir:str="/app/debug/"):
+        self.driver = driver
+        self.name = name
+        
+    @abstractmethod
+    def save(self):
+        pass
+
+class SaveHtml(SaveArtifact):
+
+    def save(self):
+        now = datetime.now()
+        file_name = self.name + now.strftime("%Y-%m-%d-%H-%M-%S") + ".html"
+        save_path = os.path.join(self.base_dir, file_name)
+        with open(save_path, "w", encoding="utf-8") as f:
+            f.write(self.driver.page_source)
+
+class SavePng(SaveArtifact):
+
+    def save(self):
+        now = datetime.now()
+        file_name = self.name + now.strftime("%Y-%m-%d-%H-%M-%S") + ".png"
+        save_path = os.path.join(self.base_dir, file_name)
+        self.driver.save_screenshot(save_path)
+

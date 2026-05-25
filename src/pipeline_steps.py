@@ -12,25 +12,7 @@ from selenium.common.exceptions import (
     ElementClickInterceptedException,
     WebDriverException
 )
-from src.pipeline_core import SeleniumStep
-
-
-from datetime import datetime
-import os
-
-now = datetime.now()
-
-date_folder = now.strftime("%Y-%m-%d")
-timestamp = now.strftime("%H-%M-%S")
-
-base_dir = os.path.join("/app/debug", date_folder)
-os.makedirs(base_dir, exist_ok=True)
-
-png_path_button = os.path.join(base_dir, f"{timestamp}_button_debug.png")
-html_path_button = os.path.join(base_dir, f"{timestamp}_button_page.html")
-
-png_path_click = os.path.join(base_dir, f"{timestamp}_click debug.png")
-html_path_click  = os.path.join(base_dir, f"{timestamp}click_debug.html")
+from src.pipeline_core import SeleniumStep, SaveHtml, SavePng
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +35,8 @@ class ClickSectionIsBlockingStep(SeleniumStep):
             ) as e:
             logger.exception(f"NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
 
-            self.driver.save_screenshot(png_path_button)
-            with open(html_path_button, "w", encoding="utf-8") as f:
-                f.write(self.driver.page_source)
+            SaveHtml(driver=self.driver, name=self.name)
+            SavePng(driver=self.driver, name=self.name)
 
             return None
 
@@ -108,9 +89,8 @@ class ClickElementStep(SeleniumStep):
                 WebDriverException) as e:
             logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
 
-            self.driver.save_screenshot(png_path_click)
-            with open(html_path_click, "w", encoding="utf-8") as f:
-                f.write(self.driver.page_source)
+            SaveHtml(driver=self.driver, name=self.name)
+            SavePng(driver=self.driver, name=self.name)
 
             raise
 

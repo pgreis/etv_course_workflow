@@ -75,11 +75,12 @@ def main():
     login_locators = LoginLocators()
     login_credentials = LoginCredentials(username=os.getenv("LOGIN_NAME"), # TODO: centralize location for set env vars
                                         password=os.getenv("LOGIN_PW")) # TODO: centralize location for set env vars
-    login_url = os.getenv("LOGIN_URL") # TODO: centralize location for set env vars
+    # login_url = os.getenv("LOGIN_URL") # TODO: centralize location for set env vars
 
     login_pipeline = SeleniumPipelineEngine(
         steps=[
-            GoToUrlStep(name="Go to Login Page", url=login_url, driver=driver),
+            # GoToUrlStep(name="Go to Login Page", url=login_url, driver=driver),
+            GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver),
             FillInputStep(name="Fill Username", xpath=login_locators.username, value=login_credentials.username.get_secret_value(), driver=driver),
             FillInputStep(name="Fill Password", xpath=login_locators.password, value=login_credentials.password.get_secret_value(), driver=driver),
             # ClickElementStep(name="Click Checkbox", xpath=login_locators.checkbox, driver=driver),
