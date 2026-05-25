@@ -39,11 +39,11 @@ class SeleniumPipelineEngine:
 
 class SaveArtifact(ABC):
 
-    def __init__(self, driver: Optional[WebDriver] = None, name:str=None, base_dir:str="/app/debug/"):
+    def __init__(self, driver: Optional[WebDriver] = None, name:str=None, base_dir:str="/app/debug"):
         self.driver = driver
         self.name = name
         self.base_dir = base_dir
-        
+
     @abstractmethod
     def save(self):
         pass
@@ -54,6 +54,9 @@ class SaveHtml(SaveArtifact):
         now = datetime.now()
         file_name = self.name + now.strftime("%Y-%m-%d-%H-%M-%S") + ".html"
         save_path = os.path.join(self.base_dir, file_name)
+
+        os.makedirs(self.base_dir, exist_ok=True)
+
         with open(save_path, "w", encoding="utf-8") as f:
             f.write(self.driver.page_source)
 
@@ -63,5 +66,8 @@ class SavePng(SaveArtifact):
         now = datetime.now()
         file_name = self.name + now.strftime("%Y-%m-%d-%H-%M-%S") + ".png"
         save_path = os.path.join(self.base_dir, file_name)
+
+        os.makedirs(self.base_dir, exist_ok=True)
+        
         self.driver.save_screenshot(save_path)
 
