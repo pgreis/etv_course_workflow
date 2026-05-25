@@ -5,9 +5,17 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.common.exceptions import (
+    TimeoutException,
+    NoSuchElementException,
+    StaleElementReferenceException,
+    ElementClickInterceptedException,
+    WebDriverException
+)
 from src.pipeline_core import SeleniumStep
 
+
+logger = logging.getLogger(__name__)
 
 class ClickSectionIsBlockingStep(SeleniumStep):
 
@@ -21,7 +29,12 @@ class ClickSectionIsBlockingStep(SeleniumStep):
             time.sleep(self.add_wait_time or 0)     
             element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, xpath)))
             element.click()
-        except Exception as e:
+        except (TimeoutException,
+                NoSuchElementException,
+                StaleElementReferenceException,
+            ) as e:
+            logger.exception(f"Exception NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
+            
             return None
 
 class StopLoopIfStep(SeleniumStep):
@@ -41,12 +54,19 @@ class GoToUrlStep(SeleniumStep):
         self.driver = driver
         self.add_wait_time = add_wait_time
 
-    def execute(self, ctx: dict) -> str:
-        time.sleep(self.add_wait_time or 0)  
-        resolved_url = self.url(ctx) if callable(self.url) else self.url
-        self.driver.get(resolved_url)
-        return resolved_url
-    
+    def execute(self, ctx: dict=None) -> str:
+        try:    
+            time.sleep(self.add_wait_time or 0)  
+            resolved_url = self.url(ctx) if ctx else self.url
+            self.driver.get(resolved_url)
+            return resolved_url
+        
+        except (TimeoutException,
+                NoSuchElementException,
+                StaleElementReferenceException ) as e:
+            logger.exception(f"Exception RAISED {self.name}: {e}  | url : {self.url}")
+            raise
+            
 class ClickElementStep(SeleniumStep):
     def __init__(self, name:str, xpath:str,  add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name
@@ -55,9 +75,17 @@ class ClickElementStep(SeleniumStep):
         self.driver = driver
 
     def execute(self, ctx: dict) -> None:
-        time.sleep(self.add_wait_time or 0)
-        element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, self.xpath)))
-        element.click()
+        try:
+            time.sleep(self.add_wait_time or 0)
+            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, self.xpath)))
+            element.click()
+        except (TimeoutException,
+                NoSuchElementException,
+                StaleElementReferenceException,
+                ElementClickInterceptedException,
+                WebDriverException) as e:
+            logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
+            raise
 
 class FillInputStep(SeleniumStep):
     def __init__(self, name:str, xpath:str, value:str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
@@ -68,9 +96,15 @@ class FillInputStep(SeleniumStep):
         self.driver = driver
 
     def execute(self, ctx: dict) -> None:
-        time.sleep(self.add_wait_time or 0)
-        element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, self.xpath)))
-        element.send_keys(self.value)
+        try:
+            time.sleep(self.add_wait_time or 0)
+            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, self.xpath)))
+            element.send_keys(self.value)
+        except (TimeoutException,
+                NoSuchElementException,
+                StaleElementReferenceException) as e:
+            logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
+            raise
 
 class GetElementAttributeStep(SeleniumStep):
     def __init__(self, name: str, xpath: str, attribute: str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
@@ -81,22 +115,27 @@ class GetElementAttributeStep(SeleniumStep):
         self.driver = driver
 
     def execute(self, ctx: dict) -> Optional[str]:
-        time.sleep(self.add_wait_time or 0)
-        element = WebDriverWait(driver=self.driver, timeout=20).until(
-            EC.presence_of_element_located((By.XPATH, self.xpath))
-        )
-
-        getters = {
-            "text": lambda el: el.text,
-            "href": lambda el: el.get_attribute("href"),
-        }
-
-        getter = getters.get(self.attribute, lambda el: el.get_attribute(self.attribute))
         try:
+            time.sleep(self.add_wait_time or 0)
+            element = WebDriverWait(driver=self.driver, timeout=20).until(
+                EC.presence_of_element_located((By.XPATH, self.xpath))
+            )
+
+            getters = {
+                "text": lambda el: el.text,
+                "href": lambda el: el.get_attribute("href"),
+            }
+
+            getter = getters.get(self.attribute, lambda el: el.get_attribute(self.attribute))
             return getter(element)
-        except Exception:
-            return None
-        
+        except (TimeoutException,
+                NoSuchElementException,
+                StaleElementReferenceException) as e:
+                        logger.exception(f"Exception NOT RAISED {self.name}: {e} | attibute : {self.attribute} | xpath : {self.xpath}")
+
+            
+
+
 class CheckIfAnyElementExistsStep(SeleniumStep):
     def __init__(self, name: str, xpath: str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name

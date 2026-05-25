@@ -55,7 +55,7 @@ def main():
 
     weekday_abbr=get_tomorrow_weekday_abbr(add_n_hours=24) # TODO: hard coded
     active_courses = get_active_courses_by_weekday(course_table=db.loaded_table,
-                                                weekday_ger_abb=weekday_abbr)
+                                                   weekday_ger_abb=weekday_abbr)
 
     if not active_courses:
         logger.info("No active courses for %s", weekday_abbr)
