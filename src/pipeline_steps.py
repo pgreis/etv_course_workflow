@@ -28,7 +28,8 @@ class ClickSectionIsBlockingStep(SeleniumStep):
         try:      
             time.sleep(self.add_wait_time or 0)     
             element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, xpath)))
-            element.click()
+            self.driver.execute_script("arguments[0].click();", element)        
+            
         except (TimeoutException,
                 NoSuchElementException,
                 StaleElementReferenceException,

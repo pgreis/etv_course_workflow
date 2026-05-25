@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+IS_HEADLESS = True
 
 def main():
     
@@ -63,8 +64,6 @@ def main():
 
 
     # driver
-    IS_HEADLESS = True
-
     options = Options()
     if IS_HEADLESS:
         options.add_argument("--headless")
