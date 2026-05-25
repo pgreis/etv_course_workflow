@@ -115,6 +115,7 @@ def main():
         filter_pipeline = SeleniumPipelineEngine(
             steps=[
                 GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver),
+                ClickSectionIsBlockingStep(driver=driver),
                 ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=12.0, driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
                 ClickElementStep(name="Click Weekday Option", xpath=filter_locators.weekday_filled,  driver=driver),

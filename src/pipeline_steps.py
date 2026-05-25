@@ -30,7 +30,7 @@ png_path_button = os.path.join(base_dir, f"{timestamp}_button_debug.png")
 html_path_button = os.path.join(base_dir, f"{timestamp}_button_page.html")
 
 png_path_click = os.path.join(base_dir, f"{timestamp}_click debug.png")
-click  = os.path.join(base_dir, f"{timestamp}click_debug.html")
+html_path_click  = os.path.join(base_dir, f"{timestamp}click_debug.html")
 
 logger = logging.getLogger(__name__)
 
