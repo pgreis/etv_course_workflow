@@ -42,7 +42,6 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-IS_HEADLESS = False
 
 def main():
     
@@ -63,6 +62,7 @@ def main():
         sys.exit()
 
 
+    IS_HEADLESS = False
     # driver
     options = Options()
     if IS_HEADLESS:
