@@ -27,13 +27,13 @@ class ClickSectionIsBlockingStep(SeleniumStep):
     def execute(self, ctx: dict=None, xpath: str = '//section[contains(normalize-space(@class), "is-blocking")]//button[contains(@class, "close")]') -> None:
         try:      
             time.sleep(self.add_wait_time or 0)     
-            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, xpath)))
+            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, xpath)))
             element.click()
         except (TimeoutException,
                 NoSuchElementException,
                 StaleElementReferenceException,
             ) as e:
-            logger.exception(f"Exception NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
+            logger.exception(f"NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
             
             return None
 
