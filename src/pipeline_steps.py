@@ -23,7 +23,7 @@ now = datetime.now()
 date_folder = now.strftime("%Y-%m-%d")
 timestamp = now.strftime("%H-%M-%S")
 
-base_dir = os.path.join("artifacts", date_folder)
+base_dir = os.path.join("debug", date_folder)
 os.makedirs(base_dir, exist_ok=True)
 
 png_path_button = os.path.join(base_dir, f"{timestamp}_button_debug.png")

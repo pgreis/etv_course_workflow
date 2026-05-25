@@ -46,3 +46,10 @@ jobs:
             -e COURSE_OVERVIEW_URL \
             -e INVOICE_PERSON \
             etv-course-workflow
+
+      - name: Upload Selenium artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-artifacts-${{ github.run_id }}
+          path: debug/
