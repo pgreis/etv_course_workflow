@@ -42,6 +42,7 @@ class SaveArtifact(ABC):
     def __init__(self, driver: Optional[WebDriver] = None, name:str=None, base_dir:str="/app/debug/"):
         self.driver = driver
         self.name = name
+        self.base_dir = base_dir
         
     @abstractmethod
     def save(self):
