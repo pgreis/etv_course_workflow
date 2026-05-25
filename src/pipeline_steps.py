@@ -12,9 +12,27 @@ from selenium.common.exceptions import (
     ElementClickInterceptedException,
     WebDriverException
 )
-from src.pipeline_core import SeleniumStep, SaveHtml, SavePng
+from src.pipeline_core import SeleniumStep #, SaveHtml, SavePng
 
 logger = logging.getLogger(__name__)
+
+
+
+from datetime import datetime
+import os
+
+now = datetime.now()
+
+date_folder = now.strftime("%Y-%m-%d")
+timestamp = now.strftime("%H-%M-%S")
+
+base_dir = os.path.join("artifacts", date_folder)
+os.makedirs(base_dir, exist_ok=True)
+
+png_path = os.path.join(base_dir, f"_{timestamp}_debug.png")
+html_path = os.path.join(base_dir, f"_{timestamp}_page.html")
+
+
 
 class ClickSectionIsBlockingStep(SeleniumStep):
 
@@ -34,9 +52,13 @@ class ClickSectionIsBlockingStep(SeleniumStep):
                 StaleElementReferenceException,
             ) as e:
             logger.exception(f"NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
+            
+            self.driver.save_screenshot(self.name+png_path)
+            with open(self.name+html_path, "w", encoding="utf-8") as f:
+                f.write(self.driver.page_source)
 
-            SaveHtml(driver=self.driver, name=self.name)
-            SavePng(driver=self.driver, name=self.name)
+            # SaveHtml(driver=self.driver, name=self.name)
+            # SavePng(driver=self.driver, name=self.name)
 
             return None
 
@@ -89,9 +111,12 @@ class ClickElementStep(SeleniumStep):
                 WebDriverException) as e:
             logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
 
-            SaveHtml(driver=self.driver, name=self.name)
-            SavePng(driver=self.driver, name=self.name)
-
+            # SaveHtml(driver=self.driver, name=self.name)
+            # SavePng(driver=self.driver, name=self.name)
+            self.driver.save_screenshot(self.name+png_path)
+            with open(self.name+html_path, "w", encoding="utf-8") as f:
+                f.write(self.driver.page_source)
+                
             raise
 
 class FillInputStep(SeleniumStep):
