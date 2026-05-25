@@ -24,7 +24,7 @@ class ClickSectionIsBlockingStep(SeleniumStep):
         self.name = name
         self.add_wait_time = add_wait_time
     
-    def execute(self, ctx: dict=None, xpath: str = '//section[contains(normalize-space(@class), "is-blocking")]//button[contains(@class, "close")]') -> None:
+    def execute(self, ctx: dict=None, xpath: str = '//button[contains(normalize-space(), "Nein")]') -> None:
         try:      
             time.sleep(self.add_wait_time or 0)     
             element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, xpath)))
