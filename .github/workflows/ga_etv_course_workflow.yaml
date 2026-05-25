@@ -37,6 +37,8 @@ jobs:
 
       - name: Run etv-course-workflow container
         run: |
+          mkdir -p debug
+
           docker run --rm \
             -e DB_URL \
             -e TABLE_NAME \
@@ -45,6 +47,7 @@ jobs:
             -e LOGIN_PW \
             -e COURSE_OVERVIEW_URL \
             -e INVOICE_PERSON \
+            -v ${{ github.workspace }}/debug:/app/debug \
             etv-course-workflow
 
       - name: Upload Selenium artifacts
