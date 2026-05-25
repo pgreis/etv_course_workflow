@@ -62,7 +62,7 @@ def main():
         sys.exit()
 
 
-    IS_HEADLESS = False
+    IS_HEADLESS = True
     # driver
     options = Options()
     if IS_HEADLESS:
