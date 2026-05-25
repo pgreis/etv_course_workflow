@@ -29,8 +29,12 @@ timestamp = now.strftime("%H-%M-%S")
 base_dir = os.path.join("artifacts", date_folder)
 os.makedirs(base_dir, exist_ok=True)
 
-png_path = os.path.join(base_dir, f"_{timestamp}_debug.png")
-html_path = os.path.join(base_dir, f"_{timestamp}_page.html")
+png_path_button = os.path.join(base_dir, f"{timestamp}_button_debug.png")
+html_path_button = os.path.join(base_dir, f"{timestamp}_button_page.html")
+
+png_path_click = os.path.join(base_dir, f"{timestamp}_click debug.png")
+html_path_click = os.path.join(base_dir, f"{timestamp}_click_debug.html")
+
 
 
 
@@ -53,8 +57,8 @@ class ClickSectionIsBlockingStep(SeleniumStep):
             ) as e:
             logger.exception(f"NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
             
-            self.driver.save_screenshot(self.name+png_path)
-            with open(self.name+html_path, "w", encoding="utf-8") as f:
+            self.driver.save_screenshot(png_path_button)
+            with open(html_path_button, "w", encoding="utf-8") as f:
                 f.write(self.driver.page_source)
 
             # SaveHtml(driver=self.driver, name=self.name)
@@ -113,8 +117,8 @@ class ClickElementStep(SeleniumStep):
 
             # SaveHtml(driver=self.driver, name=self.name)
             # SavePng(driver=self.driver, name=self.name)
-            self.driver.save_screenshot(self.name+png_path)
-            with open(self.name+html_path, "w", encoding="utf-8") as f:
+            self.driver.save_screenshot(png_path_button)
+            with open(html_path_button, "w", encoding="utf-8") as f:
                 f.write(self.driver.page_source)
                 
             raise
