@@ -16,7 +16,7 @@ class ClickSectionIsBlockingStep(SeleniumStep):
         self.name = name
         self.add_wait_time = add_wait_time
     
-    def execute(self, ctx: dict, xpath: str = '//section[contains(normalize-space(@class), "is-blocking")]//button[contains(@class, "close")]') -> None:
+    def execute(self, ctx: dict=None, xpath: str = '//section[contains(normalize-space(@class), "is-blocking")]//button[contains(@class, "close")]') -> None:
         try:      
             time.sleep(self.add_wait_time or 0)     
             element = WebDriverWait(driver=self.driver, timeout=20).until(EC.element_to_be_clickable(mark = (By.XPATH, xpath)))
@@ -48,7 +48,7 @@ class GoToUrlStep(SeleniumStep):
         return resolved_url
     
 class ClickElementStep(SeleniumStep):
-    def __init__(self, name:str, xpath:str,  add_wait_time: Optional[float] = 2.0, driver: Optional[WebDriver] = None):
+    def __init__(self, name:str, xpath:str,  add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name
         self.xpath = xpath
         self.add_wait_time = add_wait_time
@@ -60,7 +60,7 @@ class ClickElementStep(SeleniumStep):
         element.click()
 
 class FillInputStep(SeleniumStep):
-    def __init__(self, name:str, xpath:str, value:str, add_wait_time: Optional[float] = 2.0, driver: Optional[WebDriver] = None):
+    def __init__(self, name:str, xpath:str, value:str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name
         self.xpath = xpath
         self.value = value
@@ -73,7 +73,7 @@ class FillInputStep(SeleniumStep):
         element.send_keys(self.value)
 
 class GetElementAttributeStep(SeleniumStep):
-    def __init__(self, name: str, xpath: str, attribute: str, add_wait_time: Optional[float] = 2.0, driver: Optional[WebDriver] = None):
+    def __init__(self, name: str, xpath: str, attribute: str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name
         self.xpath = xpath
         self.attribute = attribute
@@ -98,7 +98,7 @@ class GetElementAttributeStep(SeleniumStep):
             return None
         
 class CheckIfAnyElementExistsStep(SeleniumStep):
-    def __init__(self, name: str, xpath: str, add_wait_time: Optional[float] = 2.0, driver: Optional[WebDriver] = None):
+    def __init__(self, name: str, xpath: str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name
         self.xpath = xpath
         self.add_wait_time = add_wait_time
@@ -110,7 +110,7 @@ class CheckIfAnyElementExistsStep(SeleniumStep):
         return len(elements) > 0
     
 class CheckIfConditionMetStep(SeleniumStep):
-    def __init__(self, name: str, condition: callable, add_wait_time: Optional[float] = 2.0, driver: Optional[WebDriver] = None):
+    def __init__(self, name: str, condition: callable, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):
         self.name = name
         self.condition = condition
         self.add_wait_time = add_wait_time

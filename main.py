@@ -1,12 +1,11 @@
 # base python
 import os
-import time
-from datetime import (datetime, timedelta)
 import logging
+import sys
+import time
 
 # third party
 from dotenv import load_dotenv
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
@@ -41,13 +40,14 @@ from src.models import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# load_dotenv()
+load_dotenv()
 
 
 def main():
+    
     # db
     db_conf = DatabaseConfig(db_url=os.getenv("DB_URL"), # TODO: centralize location for set env vars
-                            table_name=os.getenv("TABLE_NAME")) # TODO: centralize location for set env varsc
+                             table_name=os.getenv("TABLE_NAME")) # TODO: centralize location for set env varsc
 
 
     db = DatabaseHandler(db_url=db_conf.db_url) # TODO: centralize location for set env vars
@@ -69,6 +69,7 @@ def main():
     if IS_HEADLESS:
         options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
+    time.sleep(10) 
     driver.maximize_window()
 
     # login
@@ -82,13 +83,12 @@ def main():
             GoToUrlStep(name="Go to Login Page", url=login_url, driver=driver),
             FillInputStep(name="Fill Username", xpath=login_locators.username, value=login_credentials.username.get_secret_value(), driver=driver),
             FillInputStep(name="Fill Password", xpath=login_locators.password, value=login_credentials.password.get_secret_value(), driver=driver),
-            ClickElementStep(name="Click Checkbox", xpath=login_locators.checkbox, driver=driver),
+            # ClickElementStep(name="Click Checkbox", xpath=login_locators.checkbox, driver=driver),
             ClickElementStep(name="Click Submit", xpath=login_locators.submit_button, driver=driver)
         ]
     )
 
     login_pipeline.run()
-
 
     ### loop start
 
@@ -99,9 +99,9 @@ def main():
 
         # prepare bookin process
         booking_persona = BookingPersona(person=active_course['person'],
-                                        course_name=active_course['orig_course_name'],
-                                        weekday=active_course['weekday'],
-                                        invoice_person=os.getenv("INVOICE_PERSON")) # TODO: centralize location for set env vars
+                                         course_name=active_course['orig_course_name'],
+                                         weekday=active_course['weekday'],
+                                         invoice_person=os.getenv("INVOICE_PERSON")) # TODO: centralize location for set env vars
 
 
         # filter
@@ -115,7 +115,7 @@ def main():
 
         filter_pipeline = SeleniumPipelineEngine(
             steps=[
-                GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver, add_wait_time=10.0), # TODO: centralize location for set env vars
+                GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver),
                 ClickSectionIsBlockingStep(driver=driver, add_wait_time=10.0),
                 ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=12.0, driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
