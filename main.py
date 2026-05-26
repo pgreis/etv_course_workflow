@@ -64,15 +64,25 @@ def main():
         sys.exit()
 
 
-    IS_HEADLESS = True
-    # driver
+    # IS_HEADLESS = True
+    # # driver
+    # options = Options()
+    # if IS_HEADLESS:
+    #     options.add_argument("--headless=new")
+    # # driver = webdriver.Firefox(options=options)
+    # driver = webdriver.Chrome(options=options)
+    # time.sleep(10) 
+    # driver.maximize_window()
+
+
     options = Options()
-    if IS_HEADLESS:
-        options.add_argument("--headless=new")
-    # driver = webdriver.Firefox(options=options)
+
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
     driver = webdriver.Chrome(options=options)
-    time.sleep(10) 
-    driver.maximize_window()
+
 
     # login
     login_locators = LoginLocators()
