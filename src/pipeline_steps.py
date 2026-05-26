@@ -77,17 +77,19 @@ class StopLoopIfStep(SeleniumStep):
         return ctx["stop_loop"]
 
 class GoToUrlStep(SeleniumStep):
-    def __init__(self, name:str, url:str, driver: Optional[WebDriver] = None, add_wait_time: Optional[float] = 3.0):
+    def __init__(self, name:str, url:str, driver: Optional[WebDriver] = None, add_wait_time: Optional[float] = 3.0, add_wait_time_after: Optional[float] = 3.0):
         self.name = name
         self.url = url
         self.driver = driver
         self.add_wait_time = add_wait_time
+        self.add_wait_time_after = add_wait_time_after
 
     def execute(self, ctx: dict=None) -> str:
         try:    
             time.sleep(self.add_wait_time or 0)  
             resolved_url = self.url(ctx) if ctx else self.url
             self.driver.get(resolved_url)
+            time.sleep(self.add_wait_time_after or 0) 
             return resolved_url
         
         except (TimeoutException,
