@@ -7,7 +7,9 @@ import time
 # third party
 from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+# from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
+
 
 # internal moduls
 from db_handler import DatabaseHandler
@@ -67,7 +69,8 @@ def main():
     options = Options()
     if IS_HEADLESS:
         options.add_argument("--headless=new")
-    driver = webdriver.Firefox(options=options)
+    # driver = webdriver.Firefox(options=options)
+    driver = webdriver.Chrome(options=options)
     time.sleep(10) 
     driver.maximize_window()
 
