@@ -26,7 +26,7 @@ now = datetime.now()
 date_folder = now.strftime("%Y-%m-%d")
 timestamp = now.strftime("%H-%M-%S")
 
-base_dir = os.path.join("artifacts", date_folder)
+base_dir = os.path.join("debug", date_folder)
 os.makedirs(base_dir, exist_ok=True)
 
 png_path_button = os.path.join(base_dir, f"{timestamp}_button_debug.png")
@@ -77,7 +77,7 @@ class StopLoopIfStep(SeleniumStep):
         return ctx["stop_loop"]
 
 class GoToUrlStep(SeleniumStep):
-    def __init__(self, name:str, url:str, driver: Optional[WebDriver] = None, add_wait_time: Optional[float] = 3.0, add_wait_time_after: Optional[float] = 3.0):
+    def __init__(self, name:str, url:str, driver: Optional[WebDriver] = None, add_wait_time: Optional[float] = 3.0, add_wait_time_after: Optional[float] = 8.0):
         self.name = name
         self.url = url
         self.driver = driver

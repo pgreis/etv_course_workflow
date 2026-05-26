@@ -66,7 +66,7 @@ def main():
     # driver
     options = Options()
     if IS_HEADLESS:
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")
     driver = webdriver.Firefox(options=options)
     time.sleep(10) 
     driver.maximize_window()
