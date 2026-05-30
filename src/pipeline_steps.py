@@ -17,24 +17,30 @@ from src.pipeline_core import SeleniumStep #, SaveHtml, SavePng
 logger = logging.getLogger(__name__)
 
 
-
+# delete
+from pathlib import Path
 from datetime import datetime
-import os
 
-now = datetime.now()
+DEBUG_DIR = Path("/app/debug")
 
-date_folder = now.strftime("%Y-%m-%d")
-timestamp = now.strftime("%H-%M-%S")
+def dump_page(driver, prefix="debug"):
+    DEBUG_DIR.mkdir(parents=True, exist_ok=True)
 
-base_dir = os.path.join("debug", date_folder)
-os.makedirs(base_dir, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-png_path_button = os.path.join(base_dir, f"{timestamp}_button_debug.png")
-html_path_button = os.path.join(base_dir, f"{timestamp}_button_page.html")
+    (DEBUG_DIR / f"{prefix}_{ts}.html").write_text(
+        driver.page_source,
+        encoding="utf-8"
+    )
 
-png_path_click = os.path.join(base_dir, f"{timestamp}_click debug.png")
-html_path_click = os.path.join(base_dir, f"{timestamp}_click_debug.html")
+    driver.save_screenshot(
+        str(DEBUG_DIR / f"{prefix}_{ts}.png")
+    )
 
+    (DEBUG_DIR / f"{prefix}_{ts}.url").write_text(
+        driver.current_url,
+        encoding="utf-8"
+    )
 
 
 
@@ -57,9 +63,11 @@ class ClickSectionIsBlockingStep(SeleniumStep):
             ) as e:
             logger.exception(f"NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
             
-            self.driver.save_screenshot(png_path_button)
-            with open(html_path_button, "w", encoding="utf-8") as f:
-                f.write(self.driver.page_source)
+            dump_page(self.driver, "blocking")
+
+            # self.driver.save_screenshot(png_path_button)
+            # with open(html_path_button, "w", encoding="utf-8") as f:
+            #     f.write(self.driver.page_source)
 
             # SaveHtml(driver=self.driver, name=self.name)
             # SavePng(driver=self.driver, name=self.name)
@@ -117,11 +125,13 @@ class ClickElementStep(SeleniumStep):
                 WebDriverException) as e:
             logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
 
+
+            dump_page(self.driver, "click")
             # SaveHtml(driver=self.driver, name=self.name)
             # SavePng(driver=self.driver, name=self.name)
-            self.driver.save_screenshot(png_path_button)
-            with open(html_path_button, "w", encoding="utf-8") as f:
-                f.write(self.driver.page_source)
+            # self.driver.save_screenshot(png_path_button)
+            # with open(html_path_button, "w", encoding="utf-8") as f:
+            #     f.write(self.driver.page_source)
                 
             raise
 
