@@ -134,9 +134,9 @@ def main():
         CORRECT_FILTER_NUMBER = 3 # TODO: hard coded
         filter_pipeline = SeleniumPipelineEngine(
             steps=[
-                DumpPageStep(name="Before course url Submit", driver=driver)
+                DumpPageStep(name="Before course url Submit", driver=driver),
                 GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver), # TODO: centralize location for set env vars
-                DumpPageStep(name="After course url Submit", driver=driver)
+                DumpPageStep(name="After course url Submit", driver=driver),
                 ClickSectionIsBlockingStep(driver=driver, add_wait_time=10.0),
                 ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=12.0, driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
