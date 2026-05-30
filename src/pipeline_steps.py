@@ -42,6 +42,35 @@ def dump_page(driver, prefix="debug"):
         encoding="utf-8"
     )
 
+class DumpPageStep(SeleniumStep):
+
+    def __init__(self, driver: Optional[WebDriver] = None, name:str="Dump Page", add_wait_time: Optional[float] = 0.1, debug_dir:Path=Path("/app/debug"), prefix:str="debug"):
+        self.driver = driver
+        self.name = name
+        self.add_wait_time = add_wait_time
+        self.debug_dir = debug_dir
+        self.prefix = prefix
+
+    def execute(self, ctx: dict=None) -> None:
+        self.debug_dir.mkdir(parents=True, exist_ok=True)
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        (DEBUG_DIR / f"{self.prefix}_{ts}.html").write_text(
+            self.driver.page_source,
+            encoding="utf-8"
+        )
+
+        self.driver.save_screenshot(
+            str(DEBUG_DIR / f"{self.prefix}_{ts}.png")
+        )
+
+        (DEBUG_DIR / f"{self.prefix}_{ts}.url").write_text(
+            self.driver.current_url,
+            encoding="utf-8"
+        )
+
+
 
 
 class ClickSectionIsBlockingStep(SeleniumStep):
@@ -94,10 +123,12 @@ class GoToUrlStep(SeleniumStep):
 
     def execute(self, ctx: dict=None) -> str:
         try:    
+            logger.info(f"Go to: {self.url}")
             time.sleep(self.add_wait_time or 0)  
             resolved_url = self.url(ctx) if ctx else self.url
             self.driver.get(resolved_url)
             time.sleep(self.add_wait_time_after or 0) 
+            logger.info(f"Current Url: {self.driver.current_url}")
             return resolved_url
         
         except (TimeoutException,

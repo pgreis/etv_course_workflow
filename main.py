@@ -25,7 +25,8 @@ from src.pipeline_steps import (ClickSectionIsBlockingStep,
                                 GoToUrlStep,
                                 ClickElementStep,
                                 FillInputStep,
-                                GetElementAttributeStep)
+                                GetElementAttributeStep,
+                                DumpPageStep)
 
 # models
 from src.models import (
@@ -94,14 +95,20 @@ def main():
         steps=[
             # GoToUrlStep(name="Go to Login Page", url=login_url, driver=driver),
             GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver),
+            DumpPageStep(name="After Login URL", driver=driver),
             FillInputStep(name="Fill Username", xpath=login_locators.username, value=login_credentials.username.get_secret_value(), driver=driver),
+            DumpPageStep(name="After Username", driver=driver),
             FillInputStep(name="Fill Password", xpath=login_locators.password, value=login_credentials.password.get_secret_value(), driver=driver),
+            DumpPageStep(name="After Password", driver=driver),
+
             # ClickElementStep(name="Click Checkbox", xpath=login_locators.checkbox, driver=driver),
-            ClickElementStep(name="Click Submit", xpath=login_locators.submit_button, driver=driver)
+            ClickElementStep(name="Click Submit", xpath=login_locators.submit_button, driver=driver),
+            DumpPageStep(name="After Submit", driver=driver)
         ]
     )
 
     login_pipeline.run()
+    time.sleep(10)
 
     ### loop start
 
@@ -125,10 +132,11 @@ def main():
 
 
         CORRECT_FILTER_NUMBER = 3 # TODO: hard coded
-
         filter_pipeline = SeleniumPipelineEngine(
             steps=[
+                DumpPageStep(name="Before course url Submit", driver=driver)
                 GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver), # TODO: centralize location for set env vars
+                DumpPageStep(name="After course url Submit", driver=driver)
                 ClickSectionIsBlockingStep(driver=driver, add_wait_time=10.0),
                 ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=12.0, driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
