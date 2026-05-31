@@ -1,18 +1,10 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.6
+
 FROM python:3.12-slim
 
-# firefox
-# RUN apt-get update && apt-get install -y \
-#     firefox-esr \
-#     wget \
-#     xvfb \
-#     tar \
-#     libpq-dev \
-#     gcc \
-#     git \
-#     && rm -rf /var/lib/apt/lists/*
-
-# chrome
+# -----------------------------
+# System dependencies (browser + build tools)
+# -----------------------------
 RUN apt-get update && apt-get install -y \
     chromium \
     chromium-driver \
@@ -26,33 +18,51 @@ RUN apt-get update && apt-get install -y \
     libgbm1 \
     libasound2 \
     libxss1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install geckodriver
-RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux64.tar.gz \
-    && tar -xzf geckodriver-v0.36.0-linux64.tar.gz \
-    && mv geckodriver /usr/local/bin/ \
-    && chmod +x /usr/local/bin/geckodriver \
-    && rm geckodriver-v0.36.0-linux64.tar.gz
+# -----------------------------
+# Install uv
+# -----------------------------
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
 
-ENV DISPLAY=:99
+# -----------------------------
+# GitHub auth for private repos
+# (IMPORTANT for db-handler git dependency)
+# -----------------------------
+ARG GITHUB_TOKEN
+RUN git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
+# -----------------------------
+# Workdir
+# -----------------------------
 WORKDIR /bot
 
-# Copy dependency file first for Docker cache efficiency
-COPY requirements.txt .
+# -----------------------------
+# Copy dependency metadata first (for caching)
+# -----------------------------
+COPY pyproject.toml uv.lock ./
 
-# Install Python dependencies
-RUN --mount=type=secret,id=github_token \
-    cp requirements.txt temp-requirements.txt && \
-    sed -i "s|\${GITHUB_TOKEN}|$(cat /run/secrets/github_token)|g" temp-requirements.txt && \
-    pip install --no-cache-dir -r temp-requirements.txt && \
-    rm temp-requirements.txt
+# -----------------------------
+# Install dependencies via uv (fast + reproducible)
+# -----------------------------
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --system --frozen
 
-# Copy application files
+# -----------------------------
+# Copy application code
+# -----------------------------
 COPY src ./src
 COPY main.py .
 
+# -----------------------------
+# Environment
+# -----------------------------
 ENV PYTHONPATH=/bot
+ENV DISPLAY=:99
 
+# -----------------------------
+# Run
+# -----------------------------
 CMD ["python", "main.py"]
