@@ -65,4 +65,4 @@ ENV DISPLAY=:99
 # -----------------------------
 # Run
 # -----------------------------
-CMD ["python", "main.py"]
+CMD ["uv", "run", "python", "main.py"]
