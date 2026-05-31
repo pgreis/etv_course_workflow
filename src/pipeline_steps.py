@@ -51,7 +51,7 @@ class DumpPageStep(SeleniumStep):
 
 class ClickSectionIsBlockingStep(SeleniumStep):
 
-    def __init__(self, driver: Optional[WebDriver] = None, name:str="Click Section Is Blocking", xpath: str = '//button[contains(normalize-space(), "Nein")]', add_wait_time: Optional[float] = 5.0):
+    def __init__(self, driver: Optional[WebDriver] = None, name:str="Click Section Is Blocking", xpath: str = '//section[contains(normalize-space(@class), "is-blocking")]//button[contains(@class, "close")]', add_wait_time: Optional[float] = 5.0):
         self.driver = driver
         self.name = name
         self.add_wait_time = add_wait_time
