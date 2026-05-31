@@ -56,3 +56,4 @@ jobs:
         with:
           name: selenium-artifacts-${{ github.run_id }}
           path: debug/
+          retention-days: 7

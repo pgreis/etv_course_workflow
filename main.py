@@ -39,7 +39,6 @@ from src.models import (
     BookingLocators
 )
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -47,6 +46,8 @@ load_dotenv()
 
 
 def main():
+
+    IS_HEADLESS = True
     
     # db
     db_conf = DatabaseConfig(db_url=os.getenv("DB_URL"), # TODO: centralize location for set env vars
@@ -64,21 +65,11 @@ def main():
         logger.info("No active courses for %s", weekday_abbr)
         sys.exit()
 
-
-    # IS_HEADLESS = True
-    # # driver
-    # options = Options()
-    # if IS_HEADLESS:
-    #     options.add_argument("--headless=new")
-    # # driver = webdriver.Firefox(options=options)
-    # driver = webdriver.Chrome(options=options)
-    # time.sleep(10) 
-    # driver.maximize_window()
-
-
+    # driver
     options = Options()
-
-    options.add_argument("--headless=new")
+    if IS_HEADLESS:
+        options.add_argument("--headless=new")
+    options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
@@ -89,29 +80,25 @@ def main():
     login_locators = LoginLocators()
     login_credentials = LoginCredentials(username=os.getenv("LOGIN_NAME"), # TODO: centralize location for set env vars
                                         password=os.getenv("LOGIN_PW")) # TODO: centralize location for set env vars
-    # login_url = os.getenv("LOGIN_URL") # TODO: centralize location for set env vars
+    login_url = os.getenv("LOGIN_URL") # TODO: centralize location for set env vars
 
     login_pipeline = SeleniumPipelineEngine(
         steps=[
-            # GoToUrlStep(name="Go to Login Page", url=login_url, driver=driver),
-            GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver),
+            GoToUrlStep(name="Go to Login Page", url=login_url, driver=driver),
             DumpPageStep(name="After Login URL", driver=driver),
             FillInputStep(name="Fill Username", xpath=login_locators.username, value=login_credentials.username.get_secret_value(), driver=driver),
             DumpPageStep(name="After Username", driver=driver),
             FillInputStep(name="Fill Password", xpath=login_locators.password, value=login_credentials.password.get_secret_value(), driver=driver),
             DumpPageStep(name="After Password", driver=driver),
-
-            # ClickElementStep(name="Click Checkbox", xpath=login_locators.checkbox, driver=driver),
+            # ClickElementStep(name="Click Checkbox", xpath=login_locators.checkbox, driver=driver), # site removed this element
             ClickElementStep(name="Click Submit", xpath=login_locators.submit_button, driver=driver),
             DumpPageStep(name="After Submit", driver=driver)
         ]
     )
 
     login_pipeline.run()
-    time.sleep(10)
 
     ### loop start
-
     for active_course in active_courses:
         logger.info("\n------------------------------")
         logger.info(f"Processing course: {active_course['orig_course_name']} on {active_course['weekday']} for person {active_course['person']}")
@@ -134,14 +121,16 @@ def main():
         CORRECT_FILTER_NUMBER = 3 # TODO: hard coded
         filter_pipeline = SeleniumPipelineEngine(
             steps=[
-                DumpPageStep(name="Before course url Submit", driver=driver),
-                GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver), # TODO: centralize location for set env vars
+                DumpPageStep(name="Before course url Submit", driver=driver).execute(),
+                GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver).execute(), # TODO: centralize location for set env vars
                 DumpPageStep(name="After course url Submit", driver=driver),
-                ClickSectionIsBlockingStep(driver=driver, add_wait_time=10.0),
-                ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=12.0, driver=driver),
+                ClickSectionIsBlockingStep(driver=driver).execute(),
+                ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=10.0, driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
                 ClickElementStep(name="Click Weekday Option", xpath=filter_locators.weekday_filled,  driver=driver),
+                DumpPageStep(name="Before apply button", driver=driver),
                 ClickElementStep(name="Click Apply Filter Button", xpath=filter_locators.apply_filter_filled, driver=driver),
+                DumpPageStep(name="After apply button", driver=driver),
                 GetElementAttributeStep(name="Get Applied Filter Number", xpath=filter_locators.filter_number, attribute="text", driver=driver),
                 CheckIfConditionMetStep(name="Check if correct filter number is applied", condition=lambda ctx: int(ctx.get("Get Applied Filter Number", "0")) == CORRECT_FILTER_NUMBER)
             ]
@@ -157,7 +146,9 @@ def main():
         visit_course_pipeline = SeleniumPipelineEngine(
             steps=[
                 GetElementAttributeStep(name="Get course link", xpath=visit_course_locators.course_filled, attribute="href", driver=driver),
+                DumpPageStep(name="Before go to course page", driver=driver),
                 GoToUrlStep(name="Go to Course Page", url=lambda ctx: ctx["Get course link"], driver=driver),
+                DumpPageStep(name="After go to course page", driver=driver),
                 ])
 
         visit_course_pipeline.run()
@@ -177,11 +168,14 @@ def main():
             steps=[
                 ClickSectionIsBlockingStep(driver=driver),
                 CheckIfAnyElementExistsStep(name="Check if course is bookable", xpath=booking_locators.book_person_filled, driver=driver),
+                DumpPageStep(name="After is bookabale check", driver=driver),
                 StopLoopIfStep(name="Stop if not bookable", condition=lambda ctx: not ctx.get("Check if course is bookable", False)),
                 ClickElementStep(name="Click Book Person Dropdown", xpath=booking_locators.book_person_filled, driver=driver),
                 ClickElementStep(name="Click Invoice Person Dropdown", xpath=booking_locators.invoice_person_filled, driver=driver),
                 ClickElementStep(name="Click Agree Terms Checkbox", xpath=booking_locators.aggree_terms_filled, driver=driver),
+                DumpPageStep(name="Before confirm booking", driver=driver),
                 ClickElementStep(name="Click Confirm Booking Button", xpath=booking_locators.confirm_booking_filled, driver=driver),
+                DumpPageStep(name="After confirm booking", driver=driver),
                 CheckIfAnyElementExistsStep(name="Check if booking is successful", xpath=booking_locators.is_booked_filled, driver=driver)
             ]
         )

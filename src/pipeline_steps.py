@@ -56,51 +56,40 @@ class DumpPageStep(SeleniumStep):
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        (DEBUG_DIR / f"{self.prefix}_{ts}.html").write_text(
+        (self.debug_dir / f"{self.prefix}_{ts}.html").write_text(
             self.driver.page_source,
             encoding="utf-8"
         )
 
         self.driver.save_screenshot(
-            str(DEBUG_DIR / f"{self.prefix}_{ts}.png")
+            str(self.debug_dir / f"{self.prefix}_{ts}.png")
         )
 
-        (DEBUG_DIR / f"{self.prefix}_{ts}.url").write_text(
+        (self.debug_dir / f"{self.prefix}_{ts}.url").write_text(
             self.driver.current_url,
             encoding="utf-8"
         )
 
-
-
-
 class ClickSectionIsBlockingStep(SeleniumStep):
 
-    def __init__(self, driver: Optional[WebDriver] = None, name:str="Click Section Is Blocking", add_wait_time: Optional[float] = 5.0):
+    def __init__(self, driver: Optional[WebDriver] = None, name:str="Click Section Is Blocking", xpath: str = '//button[contains(normalize-space(), "Nein")]', add_wait_time: Optional[float] = 5.0):
         self.driver = driver
         self.name = name
         self.add_wait_time = add_wait_time
+        self.xpath = xpath
     
-    def execute(self, ctx: dict=None, xpath: str = '//button[contains(normalize-space(), "Nein")]') -> None:
+    def execute(self, ctx: dict=None, ) -> None:
         try:      
             time.sleep(self.add_wait_time or 0)     
-            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, xpath)))
+            element = WebDriverWait(driver=self.driver, timeout=20).until(EC.presence_of_element_located(locator = (By.XPATH, self.xpath)))
             self.driver.execute_script("arguments[0].click();", element)        
             
         except (TimeoutException,
                 NoSuchElementException,
                 StaleElementReferenceException,
             ) as e:
-            logger.exception(f"NOT RAISED in {self.name}: {e}  | xpath : {xpath} ")
+            logger.exception(f"STEP [{self.name}] | [NOT RAISED] | [XPATH] {self.xpath} | [EXCEPTION] {e}")
             
-            dump_page(self.driver, "blocking")
-
-            # self.driver.save_screenshot(png_path_button)
-            # with open(html_path_button, "w", encoding="utf-8") as f:
-            #     f.write(self.driver.page_source)
-
-            # SaveHtml(driver=self.driver, name=self.name)
-            # SavePng(driver=self.driver, name=self.name)
-
             return None
 
 class StopLoopIfStep(SeleniumStep):
@@ -121,20 +110,19 @@ class GoToUrlStep(SeleniumStep):
         self.add_wait_time = add_wait_time
         self.add_wait_time_after = add_wait_time_after
 
-    def execute(self, ctx: dict=None) -> str:
+    def execute(self, ctx: dict=None) -> dict:
         try:    
             logger.info(f"Go to: {self.url}")
             time.sleep(self.add_wait_time or 0)  
             resolved_url = self.url(ctx) if ctx else self.url
             self.driver.get(resolved_url)
             time.sleep(self.add_wait_time_after or 0) 
-            logger.info(f"Current Url: {self.driver.current_url}")
-            return resolved_url
+            return {"url_to_visit" : resolved_url, "current_url" : self.driver.current_url}
         
         except (TimeoutException,
                 NoSuchElementException,
                 StaleElementReferenceException ) as e:
-            logger.exception(f"Exception RAISED {self.name}: {e}  | url : {self.url}")
+            logger.exception(f"STEP [{self.name}] | [RAISED] | [URL] {self.url} | [EXCEPTION] {e}")
             raise
             
 class ClickElementStep(SeleniumStep):
@@ -154,16 +142,7 @@ class ClickElementStep(SeleniumStep):
                 StaleElementReferenceException,
                 ElementClickInterceptedException,
                 WebDriverException) as e:
-            logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
-
-
-            dump_page(self.driver, "click")
-            # SaveHtml(driver=self.driver, name=self.name)
-            # SavePng(driver=self.driver, name=self.name)
-            # self.driver.save_screenshot(png_path_button)
-            # with open(html_path_button, "w", encoding="utf-8") as f:
-            #     f.write(self.driver.page_source)
-                
+            logger.exception(f"STEP [{self.name}] | [RAISED] | [XPATH] {self.xpath} | [EXCEPTION] {e}")
             raise
 
 class FillInputStep(SeleniumStep):
@@ -182,7 +161,7 @@ class FillInputStep(SeleniumStep):
         except (TimeoutException,
                 NoSuchElementException,
                 StaleElementReferenceException) as e:
-            logger.exception(f"Exception RAISED {self.name}: {e}  | xpath : {self.xpath}")
+            logger.exception(f"STEP [{self.name}] | [RAISED] | [XPATH] {self.xpath} | [EXCEPTION] {e}")
             raise
 
 class GetElementAttributeStep(SeleniumStep):
@@ -210,9 +189,7 @@ class GetElementAttributeStep(SeleniumStep):
         except (TimeoutException,
                 NoSuchElementException,
                 StaleElementReferenceException) as e:
-                        logger.exception(f"Exception NOT RAISED {self.name}: {e} | attibute : {self.attribute} | xpath : {self.xpath}")
-
-            
+            logger.exception(f"STEP [{self.name}] | [NOT RAISED] | [ATTRIBUTE] : {self.attribute} | [XPATH] {self.xpath} | [EXCEPTION] {e}")
 
 
 class CheckIfAnyElementExistsStep(SeleniumStep):
