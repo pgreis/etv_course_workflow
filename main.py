@@ -71,6 +71,15 @@ def main():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
+    prefs = {
+        "intl.accept_languages": "de,de_DE",
+        "translate": {
+            "enabled": False
+            }
+        }
+
+    options.add_experimental_option("prefs", prefs)
+
     driver = webdriver.Chrome(options=options)
 
 
