@@ -48,7 +48,7 @@ COPY pyproject.toml uv.lock ./
 # Install dependencies via uv (fast + reproducible)
 # -----------------------------
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --system --frozen
+    uv sync --frozen
 
 # -----------------------------
 # Copy application code
