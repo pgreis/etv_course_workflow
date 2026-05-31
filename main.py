@@ -3,7 +3,6 @@ import logging
 import sys
 
 # third party
-from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
