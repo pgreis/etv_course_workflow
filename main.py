@@ -66,6 +66,7 @@ def main():
     options = Options()
     if IS_HEADLESS:
         options.add_argument("--headless=new")
+    options.add_argument("--lang=de-DE")
     options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -122,10 +123,13 @@ def main():
                 GoToUrlStep(name="Go to Course Overview", url=env_vars.COURSE_OVERVIEW_URL, driver=driver), # TODO: centralize location for set env vars
                 DumpPageStep(name="After course url Submit", driver=driver),
                 ClickSectionIsBlockingStep(driver=driver),
+                DumpPageStep(name="Before click filter", driver=driver),
                 ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=10.0, driver=driver),
+                DumpPageStep(name="After click filter", driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
+                DumpPageStep(name="After click location", driver=driver),
                 ClickElementStep(name="Click Weekday Option", xpath=filter_locators.weekday_filled,  driver=driver),
-                DumpPageStep(name="Before apply button", driver=driver),
+                DumpPageStep(name="After click weekday", driver=driver),
                 ClickElementStep(name="Click Apply Filter Button", xpath=filter_locators.apply_filter_filled, driver=driver),
                 DumpPageStep(name="After apply button", driver=driver),
                 GetElementAttributeStep(name="Get Applied Filter Number", xpath=filter_locators.filter_number, attribute="text", driver=driver),
