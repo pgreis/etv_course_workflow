@@ -1,6 +1,23 @@
 from pydantic import BaseModel, Field, SecretStr, ConfigDict
 import os
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class EnvVars(BaseSettings):
+    DB_URL: SecretStr
+    TABLE_NAME: str
+    LOGIN_URL: str
+    LOGIN_NAME: SecretStr
+    LOGIN_PW: SecretStr
+    INVOICE_PERSON: str
+    COURSE_OVERVIEW_URL: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
+
+
 # database
 class DatabaseConfig(BaseModel):
     db_url: str

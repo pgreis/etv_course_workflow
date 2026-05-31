@@ -9,7 +9,7 @@ dependencies = [
     "playwright==1.59.0",
     "psycopg2>=2.9.12",
     "pydantic==2.13.4",
-    "python-dotenv==1.2.2",
+    "pydantic-settings>=2.14.1",
     "selenium>=4.44.0",
 ]
 

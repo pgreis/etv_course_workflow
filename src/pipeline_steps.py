@@ -1,6 +1,9 @@
 import time
+from pathlib import Path
+from datetime import datetime
 import logging
 from typing import Optional
+
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,35 +15,11 @@ from selenium.common.exceptions import (
     ElementClickInterceptedException,
     WebDriverException
 )
+
 from src.pipeline_core import SeleniumStep #, SaveHtml, SavePng
 
 logger = logging.getLogger(__name__)
 
-
-# delete
-from pathlib import Path
-from datetime import datetime
-
-DEBUG_DIR = Path("/app/debug")
-
-def dump_page(driver, prefix="debug"):
-    DEBUG_DIR.mkdir(parents=True, exist_ok=True)
-
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    (DEBUG_DIR / f"{prefix}_{ts}.html").write_text(
-        driver.page_source,
-        encoding="utf-8"
-    )
-
-    driver.save_screenshot(
-        str(DEBUG_DIR / f"{prefix}_{ts}.png")
-    )
-
-    (DEBUG_DIR / f"{prefix}_{ts}.url").write_text(
-        driver.current_url,
-        encoding="utf-8"
-    )
 
 class DumpPageStep(SeleniumStep):
 
@@ -114,7 +93,7 @@ class GoToUrlStep(SeleniumStep):
         try:    
             logger.info(f"Go to: {self.url}")
             time.sleep(self.add_wait_time or 0)  
-            resolved_url = self.url(ctx) if ctx else self.url
+            resolved_url = self.url(ctx) if callable(self.url) else self.url
             self.driver.get(resolved_url)
             time.sleep(self.add_wait_time_after or 0) 
             return {"url_to_visit" : resolved_url, "current_url" : self.driver.current_url}
@@ -190,7 +169,6 @@ class GetElementAttributeStep(SeleniumStep):
                 NoSuchElementException,
                 StaleElementReferenceException) as e:
             logger.exception(f"STEP [{self.name}] | [NOT RAISED] | [ATTRIBUTE] : {self.attribute} | [XPATH] {self.xpath} | [EXCEPTION] {e}")
-
 
 class CheckIfAnyElementExistsStep(SeleniumStep):
     def __init__(self, name: str, xpath: str, add_wait_time: Optional[float] = 3.5, driver: Optional[WebDriver] = None):

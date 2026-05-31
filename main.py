@@ -1,15 +1,11 @@
 # base python
-import os
 import logging
 import sys
-import time
 
 # third party
 from dotenv import load_dotenv
 from selenium import webdriver
-# from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.chrome.options import Options
-
 
 # internal moduls
 from db_handler import DatabaseHandler
@@ -30,6 +26,7 @@ from src.pipeline_steps import (ClickSectionIsBlockingStep,
 
 # models
 from src.models import (
+    EnvVars,
     DatabaseConfig,
     LoginLocators,
     LoginCredentials,
@@ -42,20 +39,21 @@ from src.models import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-
 
 def main():
 
     IS_HEADLESS = True
+    # IS_HEADLESS = False
     
+    env_vars = EnvVars()
+
     # db
-    db_conf = DatabaseConfig(db_url=os.getenv("DB_URL"), # TODO: centralize location for set env vars
-                             table_name=os.getenv("TABLE_NAME")) # TODO: centralize location for set env varsc
+    db_conf = DatabaseConfig(db_url=env_vars.DB_URL.get_secret_value(),
+                             table_name=env_vars.TABLE_NAME)
 
 
-    db = DatabaseHandler(db_url=db_conf.db_url) # TODO: centralize location for set env vars
-    db.load_table(table_name=db_conf.table_name) # TODO: centralize location for set env vars
+    db = DatabaseHandler(db_url=db_conf.db_url)
+    db.load_table(table_name=db_conf.table_name)
 
     weekday_abbr=get_tomorrow_weekday_abbr(add_n_hours=24) # TODO: hard coded
     active_courses = get_active_courses_by_weekday(course_table=db.loaded_table,
@@ -78,9 +76,9 @@ def main():
 
     # login
     login_locators = LoginLocators()
-    login_credentials = LoginCredentials(username=os.getenv("LOGIN_NAME"), # TODO: centralize location for set env vars
-                                        password=os.getenv("LOGIN_PW")) # TODO: centralize location for set env vars
-    login_url = os.getenv("LOGIN_URL") # TODO: centralize location for set env vars
+    login_credentials = LoginCredentials(username=env_vars.LOGIN_NAME.get_secret_value(),
+                                         password=env_vars.LOGIN_PW.get_secret_value())
+    login_url = env_vars.LOGIN_URL
 
     login_pipeline = SeleniumPipelineEngine(
         steps=[
@@ -108,7 +106,7 @@ def main():
         booking_persona = BookingPersona(person=active_course['person'],
                                          course_name=active_course['orig_course_name'],
                                          weekday=active_course['weekday'],
-                                         invoice_person=os.getenv("INVOICE_PERSON")) # TODO: centralize location for set env vars
+                                         invoice_person=env_vars.INVOICE_PERSON) # TODO: centralize location for set env vars
 
 
         # filter
@@ -121,10 +119,10 @@ def main():
         CORRECT_FILTER_NUMBER = 3 # TODO: hard coded
         filter_pipeline = SeleniumPipelineEngine(
             steps=[
-                DumpPageStep(name="Before course url Submit", driver=driver).execute(),
-                GoToUrlStep(name="Go to Course Overview", url=os.getenv("COURSE_OVERVIEW_URL"), driver=driver).execute(), # TODO: centralize location for set env vars
+                DumpPageStep(name="Before course url Submit", driver=driver),
+                GoToUrlStep(name="Go to Course Overview", url=env_vars.COURSE_OVERVIEW_URL, driver=driver), # TODO: centralize location for set env vars
                 DumpPageStep(name="After course url Submit", driver=driver),
-                ClickSectionIsBlockingStep(driver=driver).execute(),
+                ClickSectionIsBlockingStep(driver=driver),
                 ClickElementStep(name="Click Filter Button", xpath=filter_locators.filter, add_wait_time=10.0, driver=driver),
                 ClickElementStep(name="Click Location Dropdown", xpath=filter_locators.location_filled, driver=driver),
                 ClickElementStep(name="Click Weekday Option", xpath=filter_locators.weekday_filled,  driver=driver),
@@ -136,7 +134,7 @@ def main():
             ]
         )
 
-        last_filter_run_ctx = run_filter_until_correct(filter_pipeline=filter_pipeline)
+        run_filter_until_correct(filter_pipeline=filter_pipeline)
 
         # visit
         visit_course_locators = VisitCoursePageLocators()
@@ -182,8 +180,10 @@ def main():
             
         booking_pipeline_ctx = booking_pipeline.run()
 
+        logger.info("\n------------------------------")
         logger.info("Booking pipeline completed.")
         logger.info(f"Booking ctx: {active_course['orig_course_name']} on {active_course['weekday']} for {active_course['person']}: {booking_pipeline_ctx}")
+        logger.info("\n------------------------------")
     
 if __name__ == "__main__":
     main()
