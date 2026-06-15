@@ -181,7 +181,7 @@ def main():
                 DumpPageStep(name="After is bookabale check", driver=driver),
                 StopLoopIfStep(name="Stop if not bookable", condition=lambda ctx: not ctx.get("Check if course is bookable", False)),
                 ClickElementStep(name="Click Book Person Dropdown", xpath=booking_locators.book_person_filled, driver=driver),
-                ClickElementStep(name="Click Invoice Person Dropdown", xpath=booking_locators.invoice_person_filled, driver=driver),
+                # ClickElementStep(name="Click Invoice Person Dropdown", xpath=booking_locators.invoice_person_filled, driver=driver),
                 ClickElementStep(name="Click Agree Terms Checkbox", xpath=booking_locators.aggree_terms_filled, driver=driver),
                 DumpPageStep(name="Before confirm booking", driver=driver),
                 ClickElementStep(name="Click Confirm Booking Button", xpath=booking_locators.confirm_booking_filled, driver=driver),
